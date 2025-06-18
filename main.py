@@ -5,7 +5,10 @@ app = FastAPI()
 
 @app.get('/')
 def read_root():
-    return {"message":"Fast api is working"}
+    return {"message":"Fast api is woring"}
 
 
 
+@app.get('/about')
+def some():
+    return {"message":"about is returning"}
