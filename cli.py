@@ -11,7 +11,7 @@ def start():
     args=parser.parse_args()
     os.environ['ALLOWED_ORIGIN'] =args.origin
     
-    if  not args.orign:
+    if  not args.origin:
         raise ReferenceError("Origin is required for the cache server to work")
     if not args.port:
         raise ReferenceError("Port is required for the cache server to work")

@@ -7,7 +7,8 @@ import os
 import httpx
 
 app = FastAPI()
-allowed_origin=os.getenv('ALLOWED_ORIGIN') 
+
+allowed_origin = os.getenv("ALLOWED_ORIGIN", "").rstrip("/")
 
 app.add_middleware(
 CORSMiddleware,
@@ -20,10 +21,11 @@ allow_headers=["*"]
 
 @app.api_route("{path:path}",methods=["GET"])
 async def proxy(path:str, request:Request):
-    query=request.url.query
-    full_path= f"/{path}?{query}" if query else f"/{path}"
-    cache_key=f"{request.method}:{full_path}"
     
+    query=request.url.query
+    full_path= f"/{path}?{query}" if query else f"{path}"
+    cache_key=f"{request.method}:{full_path}"
+   
     cached= get_cache(cache_key)
     if cached:
         return Response(
@@ -34,14 +36,15 @@ async def proxy(path:str, request:Request):
         )
         
     #Now to add it to cache map
-    target_url=f"allowed_origin/{path}"
+    target_url = f"{allowed_origin}{path}"
+   
     if query:
         target_url += f'?{query}'
     
     
     # Now to forward the request to the proxy server
     
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(follow_redirects=True) as client:
         origin_response=await client.request(method=request.method, url=target_url)
         
     
@@ -53,6 +56,6 @@ async def proxy(path:str, request:Request):
         content=origin_response.content,
         status_code=origin_response.status_code,
         headers={"X-Cache":"MISS"},
-        media_type=origin_response.headers.get("content-type":"application/json")
+        media_type=origin_response.headers.get("content-type","application/json")
     )
             
