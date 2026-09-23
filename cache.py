@@ -3,7 +3,7 @@ cache_store={}
 def set_cache(key:str,value:dict):
     # set cache in the cache store obj
     cache_store[key]=value
-    print("cache is set")
+    print("cache is stored")
     return 
 
 def get_cache(key):
